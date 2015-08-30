@@ -103,9 +103,11 @@ function mongoDump(options, directory, callback) {
 
   mongoOptions= [
     '-h', options.host + ':' + options.port,
-    '-d', options.db,
     '-o', directory
   ];
+  if (!isBlank(options.db)) {
+    mongoOptions.append('-d', options.db);
+  }
 
   if(options.username && options.password) {
     mongoOptions.push('-u');
@@ -151,6 +153,10 @@ function compressDirectory(directory, input, output, callback) {
     , tarOptions;
 
   callback = callback || function() { };
+
+  if (input === 'all') {
+    input = '*'; // use wildcard match for tar input
+  }
 
   tarOptions = [
     '-zcf',
