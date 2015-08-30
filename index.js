@@ -180,7 +180,7 @@ function compressDirectory(directory, input, output, callback) {
     input
   ];
 
-  log('Starting compression of ' + input + ' into ' + output, 'info');
+  log('Starting compression of ' + directory+'/'+input + ' into ' + directory+'/'+output, 'info');
   tar = spawn('tar', tarOptions, { cwd: directory });
 
   tar.stderr.on('data', function (data) {
@@ -285,7 +285,7 @@ function sync(mongodbConfig, s3Config, callback) {
 
   async.series(tmpDirCleanupFns.concat([
     async.apply(mongoDump, mongodbConfig, dumpDir),
-    async.apply(compressDirectory, backupDir, dumpDir, archiveName),
+    async.apply(compressDirectory, backupDir, 'dump', archiveName),
     d.bind(async.apply(sendToS3, s3Config, backupDir, archiveName)) // this function sometimes throws EPIPE errors
   ]), function(err) {
     if(err) {
