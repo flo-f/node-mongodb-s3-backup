@@ -155,7 +155,7 @@ function compressDirectory(directory, input, output, callback) {
   callback = callback || function() { };
 
   if (input === 'all') {
-    input = '*'; // use wildcard match for tar input
+    input = '.'; // use `directory` for tar input
   }
 
   tarOptions = [
