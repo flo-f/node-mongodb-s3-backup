@@ -285,7 +285,7 @@ function sync(mongodbConfig, s3Config, callback) {
 
   async.series(tmpDirCleanupFns.concat([
     async.apply(mongoDump, mongodbConfig, dumpDir),
-    async.apply(compressDirectory, backupDir, 'dump', archiveName),
+    async.apply(compressDirectory, backupDir, '../dump/', archiveName),
     d.bind(async.apply(sendToS3, s3Config, backupDir, archiveName)) // this function sometimes throws EPIPE errors
   ]), function(err) {
     if(err) {
