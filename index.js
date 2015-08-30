@@ -6,6 +6,18 @@ var exec = require('child_process').exec
   , domain = require('domain')
   , d = domain.create();
 
+
+/**
+ * isBlank
+ *
+ * Checks whether a string is blank, null or undefined.
+ *
+ * @param str  the string to check
+ */
+function isBlank(str) {
+  return (!str || /^\s*$/.test(str));
+}
+
 /**
  * log
  *
@@ -91,7 +103,7 @@ function mongoDump(options, directory, callback) {
 
   mongoOptions= [
     '-h', options.host + ':' + options.port,
-    '-d', (options.db ? options.db : ''),
+    '-d', options.db,
     '-o', directory
   ];
 
@@ -226,7 +238,7 @@ function sendToS3(options, directory, target, callback) {
  * @param callback        callback(err)
  */
 function sync(mongodbConfig, s3Config, callback) {
-  if(!mongodbConfig.db) {
+  if(isBlank(mongodbConfig.db)) {
     mongodbConfig.backupName = 'all';
     log('No database to be backed up is specified. Using backup name' + mongodbConfig.backupName);
   } else {
