@@ -86,6 +86,28 @@ function removeRF(target, callback) {
   });
 }
 
+/* mkdir
+ *
+ * Creates a directory.
+ *
+ * @param target       path to the new directory
+ * @param callback     callback(error)
+ */
+function mkdir(target, callback) {
+  var fs = require('fs');
+
+  callback = callback || function() { };
+
+  try {
+    log('Creating folder ' + target);
+    fs.mkdirSync(path);
+  } catch(e) {
+    if ( e.code != 'EEXIST' ) {
+      return callback(e);
+    }
+  }
+}
+
 /**
  * mongoDump
  *
@@ -259,7 +281,8 @@ function sync(mongodbConfig, s3Config, callback) {
   tmpDirCleanupFns = [
     async.apply(removeRF, dumpDir),
     async.apply(removeRF, backupDir),
-    async.apply(removeRF, path.join(tmpDir, archiveName))
+    async.apply(removeRF, path.join(tmpDir, archiveName),
+    async.apply(mkdir, backupDir))
   ];
 
   async.series(tmpDirCleanupFns.concat([
