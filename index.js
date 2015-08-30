@@ -189,7 +189,7 @@ function compressDirectory(directory, input, output, callback) {
 
   tar.on('exit', function (code) {
     if(code === 0) {
-      log('successfully compress directory', 'info');
+      log('Successfully compressed directory', 'info');
       callback(null);
     } else {
       callback(new Error("Tar exited with code " + code));
