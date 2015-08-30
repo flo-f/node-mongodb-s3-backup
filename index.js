@@ -154,10 +154,6 @@ function compressDirectory(directory, input, output, callback) {
 
   callback = callback || function() { };
 
-  if (input === 'all') {
-    input = '.'; // use `directory` for tar input
-  }
-
   tarOptions = [
     '-zcf',
     output,
@@ -252,6 +248,7 @@ function sync(mongodbConfig, s3Config, callback) {
   }
 
   var tmpDir = path.join(require('os').tmpDir(), 'mongodb_s3_backup')
+    , dumpDir = path.join(tmpDir, 'dump')
     , backupDir = path.join(tmpDir, mongodbConfig.backupName)
     , archiveName = getArchiveName(mongodbConfig.backupName)
     , async = require('async')
@@ -260,13 +257,14 @@ function sync(mongodbConfig, s3Config, callback) {
   callback = callback || function() { };
 
   tmpDirCleanupFns = [
+    async.apply(removeRF, dumpDir),
     async.apply(removeRF, backupDir),
     async.apply(removeRF, path.join(tmpDir, archiveName))
   ];
 
   async.series(tmpDirCleanupFns.concat([
-    async.apply(mongoDump, mongodbConfig, tmpDir),
-    async.apply(compressDirectory, tmpDir, mongodbConfig.backupName, archiveName),
+    async.apply(mongoDump, mongodbConfig, dumpDir),
+    async.apply(compressDirectory, backupDir, dumpDir, archiveName),
     d.bind(async.apply(sendToS3, s3Config, tmpDir, archiveName)) // this function sometimes throws EPIPE errors
   ]), function(err) {
     if(err) {
