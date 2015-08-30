@@ -91,7 +91,7 @@ function mongoDump(options, directory, callback) {
 
   mongoOptions= [
     '-h', options.host + ':' + options.port,
-    '-d', options.db,
+    '-d', (options.db ? options.db : ''),
     '-o', directory
   ];
 
@@ -103,7 +103,7 @@ function mongoDump(options, directory, callback) {
     mongoOptions.push(options.password);
   }
 
-  log('Starting mongodump of ' + options.db, 'info');
+  log('Starting mongodump of ' + options.backupName, 'info');
   mongodump = spawn('mongodump', mongoOptions);
 
   mongodump.stdout.on('data', function (data) {
@@ -226,9 +226,16 @@ function sendToS3(options, directory, target, callback) {
  * @param callback        callback(err)
  */
 function sync(mongodbConfig, s3Config, callback) {
+  if(!mongodbConfig.db) {
+    mongodbConfig.backupName = 'all';
+    log('No database to be backed up is specified. Using backup name' + mongodbConfig.backupName);
+  } else {
+    mongodbConfig.backupName = mongodbConfig.db;
+  }
+
   var tmpDir = path.join(require('os').tmpDir(), 'mongodb_s3_backup')
-    , backupDir = path.join(tmpDir, mongodbConfig.db)
-    , archiveName = getArchiveName(mongodbConfig.db)
+    , backupDir = path.join(tmpDir, mongodbConfig.backupName)
+    , archiveName = getArchiveName(mongodbConfig.backupName)
     , async = require('async')
     , tmpDirCleanupFns;
 
@@ -241,13 +248,13 @@ function sync(mongodbConfig, s3Config, callback) {
 
   async.series(tmpDirCleanupFns.concat([
     async.apply(mongoDump, mongodbConfig, tmpDir),
-    async.apply(compressDirectory, tmpDir, mongodbConfig.db, archiveName),
+    async.apply(compressDirectory, tmpDir, mongodbConfig.backupName, archiveName),
     d.bind(async.apply(sendToS3, s3Config, tmpDir, archiveName)) // this function sometimes throws EPIPE errors
   ]), function(err) {
     if(err) {
       log(err, 'error');
     } else {
-      log('Successfully backed up ' + mongodbConfig.db);
+      log('Successfully backed up ' + mongodbConfig.backupName);
     }
     // cleanup folders
     async.series(tmpDirCleanupFns, function() {
