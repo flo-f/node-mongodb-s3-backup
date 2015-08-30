@@ -98,8 +98,12 @@ function mkdir(target, callback) {
 
   callback = callback || function() { };
 
-  log("Creating folder " + target, 'info');
-  exec( 'mkdir -p ' + target, callback);
+  fs.exists(target, function(exists) {
+    if (!exists) {
+      log("Creating folder " + target, 'info');
+      exec('mkdir -p ' + target, callback);
+    }
+  });
 }
 
 /**
@@ -275,8 +279,8 @@ function sync(mongodbConfig, s3Config, callback) {
   tmpDirCleanupFns = [
     async.apply(removeRF, dumpDir),
     async.apply(removeRF, backupDir),
-    async.apply(removeRF, path.join(tmpDir, archiveName),
-    async.apply(mkdir, backupDir))
+    async.apply(mkdir, backupDir),
+    async.apply(removeRF, path.join(tmpDir, archiveName))
   ];
 
   async.series(tmpDirCleanupFns.concat([
