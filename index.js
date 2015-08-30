@@ -240,7 +240,7 @@ function sendToS3(options, directory, target, callback) {
 function sync(mongodbConfig, s3Config, callback) {
   if(isBlank(mongodbConfig.db)) {
     mongodbConfig.backupName = 'all';
-    log('No database to be backed up is specified. Using backup name' + mongodbConfig.backupName);
+    log('No database to be backed up is specified. Using backup name: ' + mongodbConfig.backupName);
   } else {
     mongodbConfig.backupName = mongodbConfig.db;
   }
