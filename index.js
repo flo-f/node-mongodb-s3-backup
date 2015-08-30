@@ -223,7 +223,7 @@ function sendToS3(options, directory, target, callback) {
   if (options.encrypt)
     headers = {"x-amz-server-side-encryption": "AES256"}
 
-  log('Attemping to upload ' + target + ' to the ' + options.bucket + ' s3 bucket');
+  log('Attemping to upload ' + sourceFile + ' to the ' + options.bucket + ' s3 bucket');
   s3client.putFile(sourceFile, path.join(destination, target), headers, function(err, res){
     if(err) {
       return callback(err);
@@ -286,7 +286,7 @@ function sync(mongodbConfig, s3Config, callback) {
   async.series(tmpDirCleanupFns.concat([
     async.apply(mongoDump, mongodbConfig, dumpDir),
     async.apply(compressDirectory, backupDir, dumpDir, archiveName),
-    d.bind(async.apply(sendToS3, s3Config, tmpDir, archiveName)) // this function sometimes throws EPIPE errors
+    d.bind(async.apply(sendToS3, s3Config, backupDir, archiveName)) // this function sometimes throws EPIPE errors
   ]), function(err) {
     if(err) {
       log(err, 'error');
