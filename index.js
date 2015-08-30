@@ -98,14 +98,8 @@ function mkdir(target, callback) {
 
   callback = callback || function() { };
 
-  try {
-    log('Creating folder ' + target);
-    fs.mkdirSync(path);
-  } catch(e) {
-    if ( e.code != 'EEXIST' ) {
-      return callback(e);
-    }
-  }
+  log("Creating folder " + target, 'info');
+  exec( 'mkdir -p ' + target, callback);
 }
 
 /**
