@@ -223,8 +223,9 @@ function sendToS3(options, directory, target, callback) {
   if (options.encrypt)
     headers = {"x-amz-server-side-encryption": "AES256"}
 
-  log('Attemping to upload ' + sourceFile + ' to the ' + options.bucket + ' s3 bucket');
-  s3client.putFile(sourceFile, path.join(destination, target), headers, function(err, res){
+  var destinationFile = path.join(destination, target);
+  log('Attemping to upload ' + sourceFile + ' to the ' + options.bucket + ' s3 bucket into ' + destinationFile);
+  s3client.putFile(sourceFile, destinationFile, headers, function(err, res){
     if(err) {
       return callback(err);
     }
