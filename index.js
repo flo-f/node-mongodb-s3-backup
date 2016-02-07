@@ -122,6 +122,7 @@ function mongoDump(options, directory, callback) {
   callback = callback || function() { };
 
   mongoOptions= [
+    '--oplog',
     '-h', options.host + ':' + options.port,
     '-o', directory
   ];
